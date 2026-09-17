@@ -1,0 +1,9 @@
+# Dependencies for Damai Ticket Assistant (App mode only)
+# Install with: pip install -r requirements.txt
+
+# Core
+#   selenium is required transitively: the Appium runner uses
+#   selenium.webdriver.common.by / support.wait / expected_conditions.
+selenium>=4.18.0
+pydantic>=2.6.0,<3.0.0
+Appium-Python-Client>=3.1.0

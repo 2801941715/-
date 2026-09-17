@@ -1,0 +1,19 @@
+{
+  "server_url": "127.0.0.1:4723",
+  "keyword": "张靓颖",
+  "users": [
+    "姚瑜"
+  ],
+  "city": "郑州",
+  "date": "2026-08-15",
+  "price": "看台",
+  "price_index": 3,
+  "if_commit_order": false,
+  "device_caps": {
+    "skipUnlock": true,
+    "skipDeviceInitialization": true,
+    "skipServerInstallation": true,
+    "skipLogcatCapture": true,
+    "autoLaunch": false
+  }
+}

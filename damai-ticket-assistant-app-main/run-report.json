@@ -1,0 +1,179 @@
+{
+  "generated_at": "2026-08-11T10:24:02Z",
+  "overall_success": true,
+  "runs": [
+    {
+      "session": "device-1:http://127.0.0.1:4723",
+      "success": true,
+      "config": {
+        "server_url": "http://127.0.0.1:4723",
+        "users": [
+          "姚瑜"
+        ],
+        "keyword": "欢子",
+        "city": "南京",
+        "date": "2026-08-29",
+        "price": "看台",
+        "price_index": 3,
+        "device_caps": {}
+      },
+      "report": {
+        "metrics": {
+          "start_time": 1786443816.7308533,
+          "start_time_iso": "2026-08-11T18:23:36.730",
+          "end_time": 1786443842.928089,
+          "end_time_iso": "2026-08-11T18:24:02.928",
+          "duration_seconds": 26.197,
+          "attempts": 1,
+          "retries": 0,
+          "success": true,
+          "final_phase": "completed",
+          "failure_reason": null,
+          "failure_code": null
+        },
+        "phase_history": [
+          "init",
+          "connecting",
+          "applying_settings",
+          "selecting_city",
+          "tapping_purchase",
+          "selecting_price",
+          "confirming_purchase",
+          "selecting_users",
+          "submitting_order",
+          "completed"
+        ],
+        "logs": [
+          {
+            "timestamp": 1786443816.730865,
+            "timestamp_iso": "2026-08-11T18:23:36.730",
+            "level": "info",
+            "message": "第 1 次尝试",
+            "phase": "init",
+            "context": {
+              "attempt": 1,
+              "max_retries": 3,
+              "phase": "init"
+            }
+          },
+          {
+            "timestamp": 1786443816.7309513,
+            "timestamp_iso": "2026-08-11T18:23:36.730",
+            "level": "step",
+            "message": "连接 Appium server",
+            "phase": "connecting",
+            "context": {
+              "phase": "connecting"
+            }
+          },
+          {
+            "timestamp": 1786443821.723502,
+            "timestamp_iso": "2026-08-11T18:23:41.723",
+            "level": "step",
+            "message": "开始执行抢票流程",
+            "phase": "applying_settings",
+            "context": {
+              "phase": "applying_settings"
+            }
+          },
+          {
+            "timestamp": 1786443821.7236245,
+            "timestamp_iso": "2026-08-11T18:23:41.723",
+            "level": "step",
+            "message": "选择城市: 南京",
+            "phase": "selecting_city",
+            "context": {
+              "phase": "selecting_city"
+            }
+          },
+          {
+            "timestamp": 1786443824.0825305,
+            "timestamp_iso": "2026-08-11T18:23:44.082",
+            "level": "step",
+            "message": "尝试点击预约/购买按钮",
+            "phase": "tapping_purchase",
+            "context": {
+              "phase": "tapping_purchase"
+            }
+          },
+          {
+            "timestamp": 1786443824.2167923,
+            "timestamp_iso": "2026-08-11T18:23:44.216",
+            "level": "step",
+            "message": "选择票价",
+            "phase": "selecting_price",
+            "context": {
+              "phase": "selecting_price"
+            }
+          },
+          {
+            "timestamp": 1786443825.2914374,
+            "timestamp_iso": "2026-08-11T18:23:45.291",
+            "level": "info",
+            "message": "票价选择完成",
+            "phase": "selecting_price",
+            "context": {
+              "price_index": 3,
+              "phase": "selecting_price"
+            }
+          },
+          {
+            "timestamp": 1786443825.2916417,
+            "timestamp_iso": "2026-08-11T18:23:45.291",
+            "level": "step",
+            "message": "确认购买",
+            "phase": "confirming_purchase",
+            "context": {
+              "phase": "confirming_purchase"
+            }
+          },
+          {
+            "timestamp": 1786443825.4894304,
+            "timestamp_iso": "2026-08-11T18:23:45.489",
+            "level": "step",
+            "message": "选择观演人",
+            "phase": "selecting_users",
+            "context": {
+              "phase": "selecting_users"
+            }
+          },
+          {
+            "timestamp": 1786443842.4093323,
+            "timestamp_iso": "2026-08-11T18:24:02.409",
+            "level": "step",
+            "message": "提交订单",
+            "phase": "submitting_order",
+            "context": {
+              "phase": "submitting_order"
+            }
+          },
+          {
+            "timestamp": 1786443842.9279907,
+            "timestamp_iso": "2026-08-11T18:24:02.927",
+            "level": "success",
+            "message": "抢票流程执行完成",
+            "phase": "completed",
+            "context": {
+              "attempt": 1,
+              "phase": "completed"
+            }
+          },
+          {
+            "timestamp": 1786443842.9281127,
+            "timestamp_iso": "2026-08-11T18:24:02.928",
+            "level": "info",
+            "message": "执行统计",
+            "phase": "completed",
+            "context": {
+              "attempts": 1,
+              "retries": 0,
+              "duration": 26.197,
+              "success": true,
+              "phase": "completed"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
