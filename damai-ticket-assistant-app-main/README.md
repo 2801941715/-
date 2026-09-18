@@ -14,9 +14,11 @@
 
 # 大麦抢票工具 🎫
 
-一个功能完善的大麦网自动抢票工具（App 模式 / Appium），提供图形界面和命令行两种使用方式。
+一个功能完善的大麦网自动抢票工具（App 模式 / Appium），提供三种运行方式：
 
-
+- **手机内运行（安卓 App）** —— 打包成 APK 装进手机，用无障碍服务在本地抢票，不需要电脑常连；仍可从 Windows 远程调试
+- **Windows 图形界面（GUI）** —— 通过 Appium 驱动手机，提供可视化面板
+- **命令行（CLI）** —— 通过 Appium 顺序执行多个设备会话并导出 JSON 报告
 
 ## ✨ 核心功能
 
@@ -28,7 +30,18 @@
 - **定时抢票** - 可预约开抢时间并设置预热检查
 - **实时日志显示** - 清晰显示抢票进度和状态
 
-### 📱 App 模式（移动端极速抢票）
+### 🤖 安卓版（手机内运行，推荐）
+
+- **无需电脑常连** - 装成 APK 直接在手机上跑，不用 Appium Server
+- **无障碍服务驱动** - 使用安卓系统自带读屏与手势能力操控大麦 App
+- **流程与电脑版一致** - 选城市 / 票价 / 数量 / 观演人 / 提交订单，阶段与日志格式对齐
+- **可远程调试** - 保留 Windows 侧调试通道（`adb forward` + `tools/damai_remote.py`）
+- **一键离线构建** - 仅用 Android SDK + JDK 构建 APK，无需 Gradle / 联网
+
+> 快速上手请阅读 [安卓版说明](android/README.md)。
+> 验收测试：`python tools/e2e_android_test.py`（覆盖流程、多观演人、幂等、停止、异常与 dump）
+
+### 📱 App 模式（电脑端 Appium 驱动）
 
 - **Appium 驱动大麦App** - 支持 Android 设备极速自动化抢票
 - **配置文件灵活** - 支持 config.jsonc/JSON 配置多设备、多场景参数
@@ -160,6 +173,11 @@ damai-ticket-assistant/
 ├── start_gui.pyw          # Pythonw 启动脚本
 ├── damai/                 # 授权校验模块（authz）
 ├── damai_appium/          # App 模式相关模块（配置 / 运行器 / CLI）
+├── android/               # 安卓版（手机内运行，无障碍服务驱动）
+│   ├── app/               # 应用源码与资源
+│   ├── build.ps1          # 离线命令行构建 APK
+│   └── install.ps1        # 构建/安装/体检一键脚本
+├── tools/                 # Windows 侧远程调试客户端与验收测试
 ├── docs/                  # 文档与安装说明
 │   ├── guides/            # App 零基础指南
 │   └── setup/             # 环境安装与配置

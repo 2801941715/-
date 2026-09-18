@@ -1,7 +1,8 @@
 # 大麦抢票助手（damai-ticket-assistant-app-main）程序代码大纲
 
 > 基于 [WECENG/ticket-purchase](https://github.com/WECENG/ticket-purchase) 二次开发。
-> 已**剔除网页模式（Web / Selenium）**，仅保留「App 模式（Appium / 安卓大麦 App）」抢票能力，外加图形界面、安装器与测试套件。
+> 已**剔除网页模式（Web / Selenium）**，仅保留「App 模式」抢票能力。
+> 提供三种运行形态：**手机内运行（安卓 App / 无障碍服务）**、**Windows GUI（Appium 驱动）**、**CLI**，外加安装器与测试套件。
 
 ---
 
@@ -25,6 +26,8 @@
 ├─ damai_gui.py             # 主 GUI（App 模式）
 ├─ damai/                   # 授权校验（authz）
 ├─ damai_appium/            # App 模式核心（配置 / 运行器 / CLI）
+├─ android/                 # 安卓版（手机内运行：无障碍服务驱动 + 远程调试桥）
+├─ tools/                   # Windows 侧远程调试客户端
 ├─ damai_installer/         # Windows 一键安装器（Tkinter + PyInstaller）
 ├─ tests/                   # pytest 单元/集成测试
 ├─ scripts/                 # 辅助脚本（页面 dump、观演人选择验证等）
@@ -165,7 +168,80 @@
 
 ---
 
-## 4. 安装器 `damai_installer/`
+## 4. 安卓版 `android/`（手机内运行）
+
+> 把抢票逻辑整合进 APK，在手机本地用**无障碍服务**驱动大麦 App，无需 Appium Server / 无需电脑常连；
+> 同时保留 Windows 侧远程调试通道。
+
+### 4.1 构建与安装
+- `android/build.ps1`：离线命令行构建，链路为
+  `aapt2 compile → aapt2 link → javac → d8 → 打包 → zipalign → apksigner`
+  - 自动定位工具：`JAVA_HOME` / Android Studio 自带 `jbr` / `ANDROID_HOME`
+  - 不依赖 Gradle（无需联网拉取 AGP）
+  - 产物：`android/dist/damai-assistant-debug.apk`
+- `android/install.ps1`：构建（可选）+ 安装 + 建立端口转发 + 打印体检指引
+- `android/mockapp/`：**大麦 App 测试替身**（`package="cn.damai"`，复刻真实 view-id 与页面流转），
+  用于在无法安装真实大麦 App 的环境下验证选择器与流程
+- 构建参数：`-Clean`、`-OutDir`、`-BuildType`、`-AppDirName`（复用同一链路构建替身）、`-ApkName`
+
+### 4.2 应用结构 `android/app/java/com/damai/assistant/`
+| 文件 | 职责 |
+| --- | --- |
+| `MainActivity.java` | 手机端界面：配置表单、开启无障碍、启停、日志与导出 |
+| `DamaiAutomationService.java` | 无障碍服务（自动化引擎入口；启动远程调试桥） |
+| `RemoteBridge.java` | 远程调试桥：`127.0.0.1:8710` 上的 JSON 行协议服务 |
+| `RunController.java` | 运行控制与状态中心：重试循环、指标、日志（对应 `run()` + `TicketRunReport`） |
+| `TicketRunner.java` | 抢票流程（对应 `damai_appium/runner.py` 的 `DamaiAppTicketRunner`） |
+| `NodeFinder.java` | 节点查询 + 手势引擎（替代 Appium 的 find/wait/clickGesture/scrollGesture） |
+| `NodeDumper.java` | 页面层级 XML 导出（对应 `scripts/dump_current_page.py`） |
+| `Config.java` | 配置模型与校验（对应 `AppTicketConfig`） |
+| `LogEntry` / `LogLevel` | 日志条目与级别（含 emoji 前缀，与 Python 侧一致） |
+| `Phase` / `FailureReason` | 阶段与失败原因常量（与 Python 侧取值一致） |
+| `BuildConfig.java` | 应用常量（替代 Gradle 生成类，便于命令行构建） |
+
+### 4.3 Appium → 无障碍 API 对应关系
+| Python（Appium） | 安卓（本地无障碍） |
+| --- | --- |
+| `webdriver.Remote(endpoint, caps)` | `NodeFinder(AccessibilityService)` |
+| `WebDriverWait(...).until(presence...)` | `NodeFinder.waitForAny(...)` |
+| `find_elements(By.ID / XPath / UiSelector)` | `NodeFinder.findElements(Selector...)` |
+| `mobile: clickGesture {x,y,duration}` | `NodeFinder.clickAt(x, y, duration)` |
+| `mobile: scrollGesture` | `NodeFinder.scrollDown(rect, percent)` |
+
+### 4.4 远程调试（Windows 侧）
+- `tools/damai_remote.py`：仅用标准库实现的调试客户端
+  - 子命令：`devices` / `doctor` / `status` / `get-config` / `set` / `start` / `stop` / `logs` / `dump` / `report` / `install` / `forward`
+  - 自动执行 `adb forward tcp:8710 tcp:8710`
+  - `doctor` 一键体检：adb / 设备 / 应用安装 / 端口转发 / bridge 连通 / 无障碍状态
+  - 控制台编码做容错处理，GBK 终端下输出 emoji 不再报错
+- 协议：一行一个 JSON（`ping` / `status` / `getConfig` / `setConfig` / `start` / `stop` / `logs` / `dump`）
+- 安全：bridge **只绑定回环地址** `127.0.0.1`，必须经 adb 通道访问，局域网不可直连
+
+### 4.5 验收测试（模拟器实测通过）
+
+- `tools/e2e_android_test.py`：端到端验收，**35 项全部通过**
+  - A 远程通道：`doctor` / `status` / 无障碍连接
+  - B 完整流程：购买入口、票价索引命中、确认购买、进入订单页、未开启自动提交不提交、观演人精确勾选
+  - C 自动提交：走到「立即提交」完成
+  - D 多观演人：2 人组合 ×3 与 3 人全选，全部精确勾选
+  - E 幂等性：已勾选观演人不重复点击、不误取消
+  - F 停止信号：`stop` 生效、阶段 `stopped` / `user_stop`
+  - G 异常路径：无可购入口时快速失败且不卡死
+  - H 页面 dump：合法 XML、层级可解析、含 `cn.damai:id/*`、uiautomator 风格属性
+
+- 实测中发现并修复的缺陷：
+  1. `resources.arsc` 必须**不压缩**存储（targetSdk ≥ 30 否则安装失败）
+  2. `dispatchGesture` 会取消未完成的上一个手势 → 多观演人勾选只生效最后一个；
+     改为**同步等待手势完成**（回调投递独立 `HandlerThread`，避免与工作线程互等死锁）
+  3. `damai_remote.py` 管道输出使用 locale 编码（GBK）导致中文乱码/emoji 异常；
+     改为非 TTY 强制 UTF-8
+  4. `NodeDumper` 丢失父子层级；改为真实嵌套 XML，与 `uiautomator dump` 对齐
+
+---
+
+---
+
+## 5. 安装器 `damai_installer/`
 
 - `src/installer.py` — `class DamaiInstaller(tk.Tk)`：图形化一键安装
   - 配置与 UI：`load_components_config`、`create_ui`、`log`、`update_component_status`
@@ -185,7 +261,7 @@
 
 ---
 
-## 5. 测试 `tests/`
+## 6. 测试 `tests/`
 
 - `conftest.py`：`temp_dir`、`mock_appium_driver`、`mock_time`、`mock_file_operations`、`gui_instance`、`gui_appium_ready`、`gui_appium_missing`、`sample_config(s)` 等 fixture
 - `unit/test_app_config.py`：URL 规范化、JSONC 注释剥离、users 清洗、配置校验、caps 合并、类型转换、配置加载、`parse_adb_devices`
@@ -199,7 +275,7 @@
 
 ---
 
-## 6. 脚本与示例
+## 7. 脚本与示例
 
 ### 6.1 `scripts/`
 - `dump_current_page.py`：连接设备 dump 前台页面 UI 层级
@@ -220,7 +296,7 @@
 
 ---
 
-## 7. 文档与上游资源
+## 8. 文档与上游资源
 
 - `README.md`：项目总览、免责声明、核心功能、使用流程、扩展路线、致谢
 - `docs/guides/APP_MODE_README.md`：App 模式零基础上手指南（环境、Appium、常见问题）
@@ -229,7 +305,7 @@
 
 ---
 
-## 8. 关键流程对照
+## 9. 关键流程对照
 
 ### 8.1 App 模式执行链
 ```
@@ -257,7 +333,7 @@ python -m damai_appium.damai_app_v2 --config ... --retries N --export-report out
 
 ---
 
-## 9. 配置速查
+## 10. 配置速查
 
 - **App 模式**：`config.jsonc`（或 `.json`）
   - `server_url`（默认 `127.0.0.1:4723`）
@@ -271,7 +347,7 @@ python -m damai_appium.damai_app_v2 --config ... --retries N --export-report out
 
 ---
 
-## 10. 风险与待办（源码中显式标注）
+## 11. 风险与待办（源码中显式标注）
 
 - `damai/authz.py`：需把 `OWNER` / `REPO_ID_LOCK` 更新为真实仓库值（源码中的 `TODO`）
 - `damai_appium/app.md`：票价 Text 为空串问题需靠预置 `price_index` 规避；**预约功能尚未实现**

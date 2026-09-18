@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  与真实大麦 App 完全一致的 view id。
+  因为本应用的 package = cn.damai，所以这些 id 在树中会呈现为
+  cn.damai:id/xxx —— 与 TicketRunner.java 中的选择器逐字匹配。
+-->
+<resources>
+    <item name="trade_project_detail_purchase_status_bar_container_fl" type="id" />
+    <item name="project_detail_perform_price_flowlayout" type="id" />
+    <item name="btn_buy_view" type="id" />
+    <item name="recycler_main" type="id" />
+    <item name="layout_main" type="id" />
+    <item name="text_name" type="id" />
+    <item name="checkbox" type="id" />
+    <item name="img_jia" type="id" />
+</resources>

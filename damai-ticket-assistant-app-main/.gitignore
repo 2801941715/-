@@ -223,3 +223,10 @@ damai_installer/installer_files/wheels/*.whl
 
 # Executable files
 *.exe
+
+# Android 构建产物（可由 android/build.ps1 重新生成）
+android/build/
+android/dist/
+android/debug.keystore
+*.apk
+*.idsig
